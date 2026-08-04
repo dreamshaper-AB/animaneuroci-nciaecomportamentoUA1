@@ -1,0 +1,994 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Anima - Neurociência e Comportamento UA 1</title>
+  
+  <style>
+    /* ----------------------------------------------------
+       DESIGN SYSTEM ÂNIMA & VARIÁVEIS GLOBAIS
+       ---------------------------------------------------- */
+    :root {
+      /* Gradients Institucionais */
+      --grad-primary: linear-gradient(135deg, #FF6B00 0%, #C7247A 100%);
+      --grad-secondary: linear-gradient(135deg, #8332A4 0%, #00A3E0 100%);
+      --grad-accent: linear-gradient(135deg, #00A3E0 0%, #00A859 100%);
+      
+      /* Cores Base - Modo Claro (Padrão) */
+      --bg-color: #F4F6F9;
+      --surface-color: #FFFFFF;
+      --text-main: #2D2D35;
+      --text-muted: #6B7280;
+      --border-color: #E5E7EB;
+      --focus-color: #FF6B00;
+      
+      /* Dimensões */
+      --header-height: 70px;
+      --sidebar-width: 320px;
+      
+      /* Tipografia Base */
+      --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      --base-font-size: 1.1rem;
+      --line-height: 1.75;
+      
+      transition: background-color 0.3s ease, color 0.3s ease;
+    }
+
+    /* Temas */
+    [data-theme="dark"] {
+      --bg-color: #121216;
+      --surface-color: #1E1E24;
+      --text-main: #E2E8F0;
+      --text-muted: #9CA3AF;
+      --border-color: #374151;
+    }
+    
+    [data-theme="sepia"] {
+      --bg-color: #FBF0D9;
+      --surface-color: #F3E5AB;
+      --text-main: #433422;
+      --text-muted: #785F3F;
+      --border-color: #D4C49D;
+    }
+
+    /* ----------------------------------------------------
+       RESET & ACESSIBILIDADE
+       ---------------------------------------------------- */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    *:focus-visible {
+      outline: 3px solid var(--focus-color);
+      outline-offset: 2px;
+      border-radius: 4px;
+    }
+
+    body {
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      font-family: var(--font-family);
+      font-size: var(--base-font-size);
+      line-height: var(--line-height);
+      overflow-x: hidden;
+      display: flex;
+    }
+
+    /* ----------------------------------------------------
+       TIPOGRAFIA EDITORIAL
+       ---------------------------------------------------- */
+    .editorial-text {
+      text-align: justify;
+      text-justify: inter-word;
+      hyphens: auto;
+      -webkit-hyphens: auto;
+      max-width: 76ch;
+      margin: 0 auto 1.5rem auto;
+    }
+
+    h1, h2, h3, h4 {
+      line-height: 1.3;
+      margin-bottom: 1rem;
+      font-weight: 700;
+    }
+
+    h2 { font-size: 2rem; margin-top: 3rem; color: transparent; background: var(--grad-secondary); -webkit-background-clip: text; background-clip: text; }
+    h3 { font-size: 1.5rem; margin-top: 2rem; border-left: 4px solid #FF6B00; padding-left: 0.75rem; }
+
+    /* ----------------------------------------------------
+       LAYOUT: HEADER & READING SUITE
+       ---------------------------------------------------- */
+    .app-header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: var(--header-height);
+      background-color: var(--surface-color);
+      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 2rem;
+      z-index: 1000;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .menu-toggle {
+      background: none;
+      border: none;
+      font-size: 1.5rem;
+      cursor: pointer;
+      color: var(--text-main);
+      padding: 0.5rem;
+      border-radius: 8px;
+    }
+    
+    .menu-toggle:hover { background-color: var(--bg-color); }
+
+    .header-title {
+      font-size: 1.25rem;
+      font-weight: 800;
+      background: var(--grad-primary);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+
+    .reading-suite {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: var(--bg-color);
+      padding: 0.5rem;
+      border-radius: 12px;
+      border: 1px solid var(--border-color);
+    }
+
+    .rs-btn {
+      background: var(--surface-color);
+      border: 1px solid var(--border-color);
+      color: var(--text-main);
+      width: 36px;
+      height: 36px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: bold;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s;
+    }
+
+    .rs-btn:hover { background: var(--grad-secondary); color: white; border-color: transparent; }
+
+    /* ----------------------------------------------------
+       LAYOUT: SIDEBAR & TOC
+       ---------------------------------------------------- */
+    .sidebar {
+      position: fixed;
+      top: var(--header-height);
+      left: 0;
+      width: var(--sidebar-width);
+      height: calc(100vh - var(--header-height));
+      background-color: var(--surface-color);
+      border-right: 1px solid var(--border-color);
+      transform: translateX(-100%);
+      transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      z-index: 900;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .sidebar.open { transform: translateX(0); }
+
+    .progress-container {
+      padding: 1.5rem;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .progress-bar-bg {
+      width: 100%;
+      height: 8px;
+      background-color: var(--bg-color);
+      border-radius: 4px;
+      overflow: hidden;
+      margin-top: 0.5rem;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: var(--grad-primary);
+      width: 0%;
+      transition: width 0.3s;
+    }
+
+    .toc-nav {
+      padding: 1.5rem;
+      overflow-y: auto;
+      flex: 1;
+    }
+
+    .toc-link {
+      display: block;
+      padding: 0.75rem 1rem;
+      color: var(--text-main);
+      text-decoration: none;
+      border-radius: 8px;
+      margin-bottom: 0.5rem;
+      font-size: 0.95rem;
+      font-weight: 500;
+      border-left: 4px solid transparent;
+      transition: all 0.2s;
+    }
+
+    .toc-link:hover { background-color: var(--bg-color); }
+    
+    .toc-link.active {
+      background: linear-gradient(90deg, rgba(255,107,0,0.1) 0%, transparent 100%);
+      border-left-color: #FF6B00;
+      color: #FF6B00;
+      font-weight: 700;
+    }
+
+    [data-theme="dark"] .toc-link.active {
+      background: linear-gradient(90deg, rgba(131,50,164,0.2) 0%, transparent 100%);
+      border-left-color: #8332A4;
+      color: #b77ad0;
+    }
+
+    /* ----------------------------------------------------
+       LAYOUT: MAIN CONTENT
+       ---------------------------------------------------- */
+    .main-content {
+      flex: 1;
+      margin-top: var(--header-height);
+      padding: 3rem 2rem;
+      width: 100%;
+      transition: margin-left 0.3s ease;
+    }
+    
+    @media(min-width: 1024px){
+      .sidebar { transform: translateX(0); }
+      .main-content { margin-left: var(--sidebar-width); }
+      .menu-toggle { display: none; }
+    }
+
+    .content-wrapper {
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    /* ----------------------------------------------------
+       COMPONENTES INTERATIVOS
+       ---------------------------------------------------- */
+    
+    /* Hero Banner */
+    .hero-banner {
+      background: var(--grad-secondary);
+      border-radius: 24px;
+      padding: 4rem 2rem;
+      text-align: center;
+      color: white;
+      margin-bottom: 3rem;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+      position: relative;
+      overflow: hidden;
+    }
+    .hero-banner::before {
+      content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+      background: url('data:image/svg+xml;utf8,<svg width="100" height="100" xmlns="http://www.w3.org/2000/svg"><circle cx="50" cy="50" r="40" fill="rgba(255,255,255,0.05)"/></svg>') repeat;
+      opacity: 0.5; pointer-events: none;
+    }
+    .hero-banner h1 { font-size: 3rem; margin: 0; text-shadow: 0 4px 12px rgba(0,0,0,0.2); }
+    .hero-badge {
+      display: inline-block;
+      background: rgba(255,255,255,0.2);
+      backdrop-filter: blur(10px);
+      padding: 0.5rem 1.5rem;
+      border-radius: 99px;
+      font-size: 0.9rem;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      margin-bottom: 1.5rem;
+      border: 1px solid rgba(255,255,255,0.3);
+    }
+
+    /* Callout Boxes */
+    .callout {
+      border-radius: 12px;
+      padding: 1.5rem 2rem;
+      margin: 2rem auto;
+      max-width: 76ch;
+      background-color: var(--surface-color);
+      box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+      position: relative;
+      overflow: hidden;
+    }
+    .callout::before {
+      content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 6px;
+    }
+    .callout-orange::before { background: var(--grad-primary); }
+    .callout-purple::before { background: var(--grad-secondary); }
+    .callout-blue::before { background: linear-gradient(135deg, #00A3E0, #0056b3); }
+    .callout-green::before { background: var(--grad-accent); }
+    .callout-title { font-weight: 700; margin-bottom: 0.75rem; display: flex; align-items: center; gap: 0.5rem; }
+
+    /* Glassmorphism Cards */
+    .glass-card {
+      background: linear-gradient(135deg, rgba(255,255,255,0.4), rgba(255,255,255,0.1));
+      backdrop-filter: blur(16px);
+      border: 1px solid rgba(255,255,255,0.3);
+      border-radius: 16px;
+      padding: 2rem;
+      margin: 2rem auto;
+      max-width: 76ch;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+    }
+    [data-theme="dark"] .glass-card {
+      background: linear-gradient(135deg, rgba(255,255,255,0.05), rgba(255,255,255,0.01));
+      border-color: rgba(255,255,255,0.1);
+    }
+
+    /* AI Image Placeholders */
+    .anima-image-card {
+      max-width: 76ch;
+      margin: 2.5rem auto;
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+      background: var(--surface-color);
+      border: 1px solid var(--border-color);
+    }
+    .image-placeholder {
+      background: var(--bg-color);
+      height: 300px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      color: var(--text-muted);
+      border-bottom: 1px solid var(--border-color);
+    }
+    .placeholder-icon { font-size: 3rem; margin-bottom: 1rem; }
+    .ai-prompt-box { padding: 1rem; }
+    .ai-prompt-box summary { font-weight: bold; cursor: pointer; color: #8332A4; }
+    .prompt-content { padding-top: 1rem; font-size: 0.9rem; color: var(--text-muted); }
+    .prompt-content code { background: var(--bg-color); padding: 0.5rem; border-radius: 6px; display: block; white-space: pre-wrap; }
+
+    /* Interactive Quizzes */
+    .quiz-container {
+      max-width: 76ch; margin: 3rem auto; background: var(--surface-color);
+      padding: 2rem; border-radius: 16px; border: 1px solid var(--border-color);
+    }
+    .quiz-question { font-size: 1.2rem; font-weight: 700; margin-bottom: 1.5rem; }
+    .quiz-options { display: flex; flex-direction: column; gap: 0.75rem; }
+    .quiz-btn {
+      text-align: left; padding: 1rem 1.5rem; border: 2px solid var(--border-color);
+      background: transparent; border-radius: 8px; font-size: 1rem; cursor: pointer;
+      color: var(--text-main); transition: all 0.2s;
+    }
+    .quiz-btn:hover:not(:disabled) { border-color: #FF6B00; background: rgba(255,107,0,0.05); }
+    .quiz-btn.correct { background: #d1fae5; border-color: #00A859; color: #065f46; }
+    .quiz-btn.incorrect { background: #fee2e2; border-color: #ef4444; color: #991b1b; }
+    [data-theme="dark"] .quiz-btn.correct { background: rgba(0,168,89,0.2); color: #a7f3d0; }
+    [data-theme="dark"] .quiz-btn.incorrect { background: rgba(239,68,68,0.2); color: #fca5a5; }
+    .quiz-feedback { margin-top: 1rem; padding: 1rem; border-radius: 8px; display: none; }
+    .quiz-feedback.show { display: block; }
+    .btn-retry { margin-top: 1rem; padding: 0.75rem 1.5rem; background: var(--grad-primary); color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; display: none; }
+
+    /* Corporate Simulator (Steps) */
+    .simulator {
+      max-width: 76ch; margin: 3rem auto; border: 1px solid var(--border-color);
+      border-radius: 16px; overflow: hidden; background: var(--surface-color);
+    }
+    .sim-header { background: var(--grad-secondary); color: white; padding: 1.5rem; text-align: center; font-weight: bold; font-size: 1.2rem;}
+    .sim-nav { display: flex; border-bottom: 1px solid var(--border-color); background: var(--bg-color); }
+    .sim-step-btn {
+      flex: 1; padding: 1rem; border: none; background: transparent; cursor: pointer;
+      font-weight: 600; color: var(--text-muted); border-bottom: 3px solid transparent; transition: all 0.2s;
+    }
+    .sim-step-btn.active { color: #8332A4; border-bottom-color: #8332A4; background: var(--surface-color); }
+    [data-theme="dark"] .sim-step-btn.active { color: #00A3E0; border-bottom-color: #00A3E0; }
+    .sim-body { padding: 2rem; }
+    .sim-panel { display: none; }
+    .sim-panel.active { display: block; animation: fadeIn 0.4s ease; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+    /* Concept Map / Node Network (CSS Visual) */
+    .concept-map {
+      display: flex; flex-direction: column; align-items: center; gap: 2rem; margin: 3rem 0;
+    }
+    .c-node {
+      background: var(--surface-color); border: 2px solid #00A3E0; border-radius: 12px;
+      padding: 1rem 2rem; text-align: center; font-weight: bold; box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      position: relative; cursor: pointer; transition: transform 0.2s; max-width: 300px;
+    }
+    .c-node:hover { transform: scale(1.05); border-color: #FF6B00; }
+    .c-node.main { background: var(--grad-secondary); color: white; border: none; font-size: 1.2rem; }
+    .c-children { display: flex; gap: 2rem; position: relative; }
+    .c-children::before {
+      content: ''; position: absolute; top: -2rem; left: 50%; transform: translateX(-50%);
+      width: 2px; height: 2rem; background: var(--border-color);
+    }
+    .c-children::after {
+      content: ''; position: absolute; top: -2rem; left: 15%; right: 15%;
+      height: 2px; background: var(--border-color);
+    }
+    .c-node.child::before {
+      content: ''; position: absolute; top: -2rem; left: 50%; transform: translateX(-50%);
+      width: 2px; height: 2rem; background: var(--border-color);
+    }
+    @media(max-width: 600px) {
+      .c-children { flex-direction: column; }
+      .c-children::after { display: none; }
+      .c-node.child::before { height: 2rem; top: -2rem; }
+    }
+
+    /* =========================================================
+   ESTILO INSTITUCIONAL PARA IMAGENS REALISTAS (ÂNIMA)
+   ========================================================= */
+.anima-image-card {
+  width: 100%;
+  margin: 2rem 0;
+  border-radius: 20px;
+  overflow: hidden;
+  background: transparent;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  transition: transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1), box-shadow 0.3s ease;
+}
+
+.anima-image-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.14);
+}
+
+.anima-image-card img.edu-img,
+img.edu-img {
+  width: 100%;
+  height: auto;
+  max-height: 500px;
+  object-fit: cover;
+  display: block;
+  border-radius: 20px;
+}
+
+  </style>
+</head>
+<body>
+
+  <!-- HEADER -->
+  <header class="app-header" id="top-header">
+    <div class="header-left">
+      <button class="menu-toggle" aria-label="Alternar Menu Sidebar" aria-expanded="false" aria-controls="sidebar">
+        ☰
+      </button>
+      <div class="header-title">Anima - Neurociência e Comportamento UA 1</div>
+    </div>
+    
+    <div class="reading-suite" aria-label="Controles de Leitura">
+      <button class="rs-btn" onclick="setTheme('light')" aria-label="Modo Claro" title="Modo Claro">☀️</button>
+      <button class="rs-btn" onclick="setTheme('dark')" aria-label="Modo Escuro" title="Modo Escuro">🌙</button>
+      <button class="rs-btn" onclick="setTheme('sepia')" aria-label="Modo Sépia" title="Modo Sépia">📜</button>
+      <div style="width: 1px; height: 24px; background: var(--border-color); margin: 0 4px;"></div>
+      <button class="rs-btn" onclick="adjustFont(-1)" aria-label="Diminuir Fonte" title="Diminuir Fonte">A-</button>
+      <button class="rs-btn" onclick="adjustFont(1)" aria-label="Aumentar Fonte" title="Aumentar Fonte">A+</button>
+    </div>
+  </header>
+
+  <!-- SIDEBAR (TOC) -->
+  <nav class="sidebar" id="sidebar" aria-label="Sumário da Unidade">
+    <div class="progress-container">
+      <strong>Progresso de Leitura</strong>
+      <div class="progress-bar-bg">
+        <div class="progress-fill" id="reading-progress"></div>
+      </div>
+    </div>
+    <div class="toc-nav">
+      <a href="#mod1" class="toc-link">1. A Origem do Pensamento Sobre o Cérebro</a>
+      <a href="#mod2" class="toc-link">2. A Revolução do Século XX</a>
+      <a href="#mod3" class="toc-link">3. A Era Tecnológica</a>
+      <a href="#mod4" class="toc-link">4. Neuroética e Cultura</a>
+      <a href="#mod5" class="toc-link">5. Visões de Futuro e Mapas</a>
+    </div>
+  </nav>
+
+  <!-- MAIN CONTENT -->
+  <main class="main-content" id="content">
+    <div class="content-wrapper">
+      
+      <!-- HERO BANNER -->
+      <section class="hero-banner">
+        <span class="hero-badge">Unidade de Aprendizagem I</span>
+        <h1>Anima - Neurociência e Comportamento UA 1</h1>
+        <p style="margin-top: 1rem; font-size: 1.2rem; opacity: 0.9;">Neurociência - Passado, Presente e Futuro</p>
+      </section>
+
+      <!-- MÓDULO 1 -->
+      <article id="mod1" class="scroll-section">
+        <h2>A Origem do Pensamento Sobre o Cérebro: Da Antiguidade ao Século XIX</h2>
+        
+<figure class="anima-image-card">
+  <!-- Aponta para a pasta 'images' -->
+  <img src="images/1-ancient-greek.png" alt="A Origem do Pensamento Sobre o Cérebro" class="edu-img">
+</figure>
+
+        <h3>1. Contextualização Teórica</h3>
+        <p class="editorial-text">
+          A trajetória da compreensão humana sobre o sistema nervoso central não é uma linha reta de descobertas acumuladas, mas sim uma sucessão de rupturas paradigmáticas que transformaram um órgão outrora negligenciado no epicentro da identidade e do comportamento. As evidências mais remotas dessa preocupação remontam ao período Neolítico, onde a prática da trepanação — a perfuração cirúrgica do crânio em indivíduos vivos — sugere que sociedades ancestrais já associavam a cabeça a patologias ou fenômenos espirituais. Embora os motivos exatos permaneçam sob debate arqueológico, a regeneração óssea observada em diversos crânios indica que os pacientes sobreviviam ao procedimento, revelando um conhecimento rudimentar, porém prático, sobre a vitalidade craniana muito antes da formalização da medicina.
+        </p>
+
+        <p class="editorial-text">
+          Na Antiguidade Clássica, o debate sobre a sede da inteligência dividiu os pensadores em duas correntes fundamentais: a cardiocêntrica e a encefalocêntrica. Para a escola cardiocêntrica, liderada por figuras como Aristóteles, o coração era o centro do calor vital, do movimento e das sensações, devido à sua posição central e dinamismo pulsante. O cérebro, por sua vez, era relegado a uma função secundária de radiador, destinado apenas a resfriar o sangue superaquecido pelo coração. Em contrapartida, a visão encefalocêntrica, defendida por Hipócrates e mais tarde por Alcmeão de Crotona, sustentava que o cérebro era o verdadeiro receptáculo das sensações e o intérprete da consciência, baseando-se em observações clínicas de que lesões na cabeça frequentemente resultavam em déficits cognitivos e motores.
+        </p>
+
+        <div class="callout callout-orange">
+          <div class="callout-title">🧠 A Era de Galeno e a Teoria Ventricular</div>
+          <p class="editorial-text" style="margin-bottom:0;">
+            A transição para a Era Cristã e a Idade Média foi dominada pela figura de Galeno. Galeno realizou dissecações minuciosas em animais, o que o levou a propor uma teoria baseada na textura: o <strong>cérebro anterior (telencéfalo)</strong> macio seria o local das sensações, enquanto o <strong>cerebelo</strong> firme controlaria músculos. Sua maior contribuição foi a <strong>teoria ventricular</strong>: funções mentais residiam nos espaços ocos preenchidos por fluido. Os "espíritos animais" fluiriam através de nervos (vistos como tubos ocos). Este modelo persistiu por quase 1.500 anos!
+          </p>
+        </div>
+
+        <p class="editorial-text">
+          Somente com o Renascimento e, posteriormente, com o Iluminismo, essa visão começou a ser contestada por observações anatômicas mais rigorosas. A virada definitiva para a neurociência moderna ocorreu no final do século XVIII e início do XIX, quando a eletricidade foi identificada como o meio de comunicação nervosa e a busca pela localização das funções mentais ganhou força com a frenologia de Franz Joseph Gall. Embora a frenologia tenha caído em descrédito científico por sua metodologia falha, ela plantou a semente da especialização funcional, a ideia de que diferentes regiões cerebrais são responsáveis por comportamentos específicos.
+        </p>
+
+        <h3>2. Análise Crítica e Autores</h3>
+        <div class="glass-card">
+          <p class="editorial-text" style="margin-bottom:0; font-style: italic;">
+            "A evolução histórica da neurociência reflete a tensão constante entre a observação empírica e as crenças filosóficas de cada época. Segundo Bear et al. (2020), o entendimento do cérebro progrediu através de quatro marcos conceituais: a compreensão das lesões cerebrais, a natureza elétrica dos nervos, a localização de funções e a seleção natural."
+          </p>
+        </div>
+
+        <p class="editorial-text">
+          No que tange à transição para a modernidade, Lent (2023) enfatiza que a revolução galênica foi fundamental por deslocar o foco do coração para o sistema nervoso, embora tenha introduzido o erro persistente do localizacionismo ventricular. Lent (2023) observa que, apesar do erro metodológico de Gall (frenologia), sua proposta foi o catalisador para que neurologistas como Paul Broca buscassem evidências clínicas sólidas para a localização funcional.
+        </p>
+        
+        <p class="editorial-text">
+          Portanto, a integração das visões de Bear et al. (2020) e Lent (2023) permite concluir que a história da neurociência é a história do refinamento do localizacionismo. A compreensão contemporânea reconhece que a mente é o que o cérebro faz, uma síntese que só foi possível após a superação das barreiras teológicas.
+        </p>
+
+        <h3>3. Aplicação Prática (Cenário Corporativo)</h3>
+        
+        <div class="simulator" aria-label="Simulador de Cenário Corporativo">
+          <div class="sim-header">📊 Simulador RH: O Combate aos Neuromitos</div>
+          <div class="sim-nav" role="tablist">
+            <button class="sim-step-btn active" role="tab" aria-selected="true" onclick="openSimTab(event, 'sim1-step1')">Passo 1: O Mito</button>
+            <button class="sim-step-btn" role="tab" aria-selected="false" onclick="openSimTab(event, 'sim1-step2')">Passo 2: O Risco</button>
+            <button class="sim-step-btn" role="tab" aria-selected="false" onclick="openSimTab(event, 'sim1-step3')">Passo 3: A Solução</button>
+          </div>
+          <div class="sim-body">
+            <div id="sim1-step1" class="sim-panel active" role="tabpanel">
+              <h4 style="color:#FF6B00;">O Cenário na Educação Executiva</h4>
+              <p class="editorial-text">No contexto do desenvolvimento de lideranças no Brasil, um exemplo realista ocorre em consultorias de RH que utilizam testes de personalidade baseados em divisões cerebrais simplistas, como a ideia de que indivíduos são estritamente "cérebro esquerdo" (lógicos) ou "cérebro direito" (criativos).</p>
+            </div>
+            <div id="sim1-step2" class="sim-panel" role="tabpanel">
+              <h4 style="color:#8332A4;">Neofrenologia Corporativa</h4>
+              <p class="editorial-text">Imagine uma empresa de tecnologia. Se o RH ignorar a evolução histórica descrita por Bear et al. (2020), corre-se o risco de adotar uma visão neofrenológica (herança de Gall), onde se acredita que o comportamento é determinado fixamente. Tentar "etiquetar" competências através de mapeamentos rígidos é uma ciência rudimentar.</p>
+            </div>
+            <div id="sim1-step3" class="sim-panel" role="tabpanel">
+              <h4 style="color:#00A859;">Gestão Baseada em Plasticidade</h4>
+              <p class="editorial-text">Aplicando a teoria correta, a empresa passaria a focar na <strong>neuroplasticidade e na integração sistêmica</strong>. Em vez de buscar "protuberâncias" de liderança, a organização investe em ambientes que favorecem a conectividade. Assim como a ciência migrou do coração para o cérebro, empresas devem migrar da intuição para dados baseados em evidências comportamentais.</p>
+            </div>
+          </div>
+        </div>
+
+        <h3>4. Síntese</h3>
+        <div class="callout callout-green">
+          <p class="editorial-text" style="margin-bottom:0;">
+            A evolução do pensamento sobre o cérebro demonstra uma transição fundamental de explicações místicas e cardiocêntricas para uma compreensão localizada no tecido cerebral. As contribuições iniciais, mesmo que factualmente incorretas, estabeleceram bases. A neurociência herda o desafio de mapear a complexidade da mente, evitando o reducionismo na aplicação corporativa.
+          </p>
+        </div>
+
+        <!-- QUIZ 1 -->
+        <div class="quiz-container">
+          <div class="quiz-question">No debate da Antiguidade Clássica, qual era a função do cérebro segundo a escola cardiocêntrica (liderada por Aristóteles)?</div>
+          <div class="quiz-options">
+            <button class="quiz-btn" data-correct="false" onclick="checkQuiz(this)">a) O receptáculo das sensações e o intérprete da consciência.</button>
+            <button class="quiz-btn" data-correct="false" onclick="checkQuiz(this)">b) A sede dos "espíritos animais" através dos ventrículos.</button>
+            <button class="quiz-btn" data-correct="true" onclick="checkQuiz(this)">c) Uma função secundária de radiador, destinado a resfriar o sangue superaquecido pelo coração.</button>
+          </div>
+          <div class="quiz-feedback"></div>
+          <button class="btn-retry" onclick="resetQuiz(this)">🔄 Tentar Novamente</button>
+        </div>
+      </article>
+
+      <hr style="border:0; height:1px; background:var(--border-color); margin: 3rem 0;">
+
+      <!-- MÓDULO 2 -->
+      <article id="mod2" class="scroll-section">
+        <h2>A Revolução do Século XX: O Nascimento da Neurociência Moderna</h2>
+        
+        <figure class="anima-image-card">
+  <img src="images/2-infografic-neuron.png" alt="Infográfico demonstrando a estrutura de um neurônio e a transmissão de impulsos nervosos" class="edu-img">
+</figure>
+
+        <h3>1. Contextualização Teórica</h3>
+        <p class="editorial-text">
+          A transição entre o século XIX e o século XX marca o período mais fértil da história da investigação cerebral, consolidando o que hoje compreendemos como neurociência moderna. O ponto de inflexão ocorreu quando a ciência abandonou a especulação filosófica para adotar o rigor da histologia e da eletrofisiologia.
+        </p>
+        
+        <p class="editorial-text">
+          Este período foi caracterizado por uma tensão intelectual produtiva entre a teoria reticular (rede contínua) e a doutrina neuronal (células individuais). A resolução desse conflito, aliada à descoberta de que a comunicação envolvia fenômenos elétricos e mensageiros químicos, permitiu que a biologia se tornasse a linguagem fundamental da psicologia. Paralelamente, o caso de Phineas Gage (1848), reinterpretado no século XX, demonstrou que o córtex pré-frontal detinha o controle sobre a personalidade, movendo o "eu" do campo metafísico para o biológico.
+        </p>
+
+        <h3>2. Análise Crítica e Autores</h3>
+        
+        <div class="concept-map" aria-label="Mapa Conceitual: Doutrina Neuronal">
+          <div class="c-node main">🔬 A Estrutura do Sistema Nervoso (Séc XX)</div>
+          <div class="c-children">
+            <div class="c-node child">
+              <strong>Camillo Golgi</strong><br><span style="font-size:0.9rem;font-weight:normal;">Teoria Reticular (Rede contínua). Criou a coloração por prata.</span>
+            </div>
+            <div class="c-node child">
+              <strong>Ramón y Cajal</strong><br><span style="font-size:0.9rem;font-weight:normal;">Doutrina Neuronal (Unidades discretas/Contiguidade). Base da neurobiologia.</span>
+            </div>
+          </div>
+        </div>
+
+        <p class="editorial-text">
+          A evolução desse conceito levou à compreensão da sinalização. Kandel et al. (2014) detalham que a sinalização é um processo dual: propagação elétrica (potencial de ação) pelo axônio e transmissão química (neurotransmissores) na fenda sináptica. Este mecanismo químico permite a plasticidade do sistema nervoso.
+        </p>
+        
+        <p class="editorial-text">
+          Além disso, a análise do caso Gage ofereceu perspectiva sobre a localização funcional. Kandel et al. (2014) e Bear et al. (2020) ressaltam que funções complexas, como decisão ética, estão no córtex cerebral, mapeando o cérebro como um mosaico interconectado.
+        </p>
+
+        <h3>3. Aplicação Prática (Cenário Corporativo)</h3>
+        <div class="callout callout-blue">
+          <div class="callout-title">🏢 Caso TechSoluções: Neuroleadership na Prática</div>
+          <p class="editorial-text" style="margin-bottom:0;">
+            Na "TechSoluções" em Florianópolis, altos índices de turnover ocorriam. Aplicando conceitos da Doutrina Neuronal e sinalização química, o RH percebeu que o estresse crônico reduzia dopamina e aumentava cortisol, prejudicando a plasticidade sináptica. Treinaram gestores baseados no caso Phineas Gage (córtex pré-frontal e tomada de decisão sob pressão). Implementaram intervalos baseados em ritmos biológicos (Cajal) para reposição de neurotransmissores, resultando em aumento de 30% na produtividade.
+          </p>
+        </div>
+
+        <h3>4. Síntese</h3>
+        <div class="callout callout-green">
+          <p class="editorial-text" style="margin-bottom:0;">
+            A revolução neurocientífica, fundamentada na Doutrina Neuronal de Cajal e na sinalização eletroquímica, representou a transição definitiva para a biologia experimental. A ciência mapeou a estrutura física e estabeleceu parâmetros para a performance humana.
+          </p>
+        </div>
+      </article>
+
+      <hr style="border:0; height:1px; background:var(--border-color); margin: 3rem 0;">
+
+      <!-- MÓDULO 3 -->
+      <article id="mod3" class="scroll-section">
+        <h2>A Era Tecnológica e a Neurociência Contemporânea</h2>
+
+        <figure class="anima-image-card">
+  <img src="images/3-mri-v1.png" alt="Exame de ressonância magnética cerebral e mapeamento neurofuncional" class="edu-img">
+</figure>
+
+        <h3>1. Contextualização Teórica</h3>
+        <p class="editorial-text">
+          A transição para a contemporaneidade superou a dependência de estudos *post-mortem*. O marco inicial foi o Eletroencefalograma (EEG) por Hans Berger, oferecendo uma janela para a dinâmica temporal elétrica. Com as décadas de 70 e 80, Tomografia (TC) e Ressonância Magnética (RM) trouxeram imagens estruturais.
+        </p>
+
+        <div class="callout callout-orange">
+          <div class="callout-title">⚡ Big Data e fMRI</div>
+          <p class="editorial-text" style="margin-bottom:0;">
+            A verdadeira mudança foi a Ressonância Magnética Funcional (fMRI), que mapeia o fluxo sanguíneo (acoplamento neurovascular) gerando o sinal BOLD. A integração de <em>Machine Learning</em> e Big Data tornou a neurociência preditiva, permitindo analisar redes de larga escala (conectoma) e domínios como empatia e consciência.
+          </p>
+        </div>
+
+        <h3>2. Análise Crítica e Autores</h3>
+        <p class="editorial-text">
+          Conforme aponta Gazzaniga (2018), essas tecnologias não são apenas ferramentas de visualização, mas decompõem processos mentais em subcomponentes. Contudo, Kandel et al. (2014) alertam: a fMRI <strong>não mede</strong> atividade elétrica diretamente, mas sim alterações hemodinâmicas. O sinal BOLD é indireto; exige cautela.
+        </p>
+        <p class="editorial-text">
+          Gazzaniga (2018) também discute a neurociência afetiva: emoções não são ruídos, são essenciais para a racionalidade (sistema límbico e córtex pré-frontal). A integração genética e neuroimagem permite compreender a plasticidade cerebral em tempo real.
+        </p>
+
+        <h3>3. Aplicação Prática (Cenário Corporativo)</h3>
+        
+        <div class="simulator" aria-label="Simulador de Mercado Financeiro">
+          <div class="sim-header">📈 Neuro-Performance: Brasil Alpha Investimentos</div>
+          <div class="sim-nav" role="tablist">
+            <button class="sim-step-btn active" role="tab" onclick="openSimTab(event, 'sim2-step1')">Passo 1: O Sequestro</button>
+            <button class="sim-step-btn" role="tab" onclick="openSimTab(event, 'sim2-step2')">Passo 2: Monitoramento</button>
+            <button class="sim-step-btn" role="tab" onclick="openSimTab(event, 'sim2-step3')">Passo 3: UX Redesign</button>
+          </div>
+          <div class="sim-body">
+            <div id="sim2-step1" class="sim-panel active" role="tabpanel">
+              <h4 style="color:#FF6B00;">O Sequestro da Amígdala</h4>
+              <p class="editorial-text">Em uma corretora na Faria Lima, traders tomavam decisões impulsivas sob volatilidade. A neurociência afetiva explica isso como o "sequestro da amígdala", onde a emoção sobrepuja a análise racional do córtex pré-frontal dorsolateral.</p>
+            </div>
+            <div id="sim2-step2" class="sim-panel" role="tabpanel">
+              <h4 style="color:#8332A4;">Dispositivos Vestíveis (EEG)</h4>
+              <p class="editorial-text">Utilizando EEG e sensores galvânicos de pele, a empresa monitora o estresse em tempo real. O sistema emite alertas preventivos para pausas antes de operações de alto risco, baseando-se em biomarcadores de sobrecarga cognitiva.</p>
+            </div>
+            <div id="sim2-step3" class="sim-panel" role="tabpanel">
+              <h4 style="color:#00A859;">Resultados Operacionais</h4>
+              <p class="editorial-text">Ao analisar o impacto do excesso de telas na atenção sustentada, a corretora otimizou a interface dos terminais (UX). O resultado prático foi uma redução de 15% nos erros operacionais por impulsividade no primeiro semestre.</p>
+            </div>
+          </div>
+        </div>
+
+        <h3>4. Síntese</h3>
+        <div class="callout callout-green">
+          <p class="editorial-text" style="margin-bottom:0;">
+            A neurociência contemporânea uniu a precisão da imagem (fMRI/EEG) à profundidade do comportamento humano. Essa evolução revelou redes dinâmicas e a plasticidade do sistema nervoso, oferecendo ferramentas robustas para otimizar o desempenho na era digital.
+          </p>
+        </div>
+
+        <!-- QUIZ 2 -->
+        <div class="quiz-container">
+          <div class="quiz-question">De acordo com Kandel et al. (2014), o que exatamente o exame de fMRI (Ressonância Magnética Funcional) mede através do sinal BOLD?</div>
+          <div class="quiz-options">
+            <button class="quiz-btn" data-correct="false" onclick="checkQuiz(this)">a) A atividade elétrica direta (potenciais de ação) dos neurônios em tempo real.</button>
+            <button class="quiz-btn" data-correct="true" onclick="checkQuiz(this)">b) As alterações metabólicas e hemodinâmicas (fluxo sanguíneo/oxigênio) associadas indiretamente à atividade sináptica.</button>
+            <button class="quiz-btn" data-correct="false" onclick="checkQuiz(this)">c) A liberação exata de neurotransmissores como dopamina na fenda sináptica.</button>
+          </div>
+          <div class="quiz-feedback"></div>
+          <button class="btn-retry" onclick="resetQuiz(this)">🔄 Tentar Novamente</button>
+        </div>
+      </article>
+
+      <hr style="border:0; height:1px; background:var(--border-color); margin: 3rem 0;">
+
+      <!-- MÓDULO 4 -->
+      <article id="mod4" class="scroll-section">
+        <h2>Neuroética, Espiritualidade e Aspectos Culturais</h2>
+
+        <h3>1. Contextualização Teórica</h3>
+        <p class="editorial-text">
+          A trajetória da neurociência é marcada por uma transição dramática da intervenção física bruta (como a lobotomia pré-frontal de Egas Moniz) para a sofisticação das interfaces digitais. A neuroética emerge como o pilar central que sustenta a legitimidade dessas intervenções. O dilema atual não reside apenas no risco cirúrgico das Interfaces Cérebro-Máquina (ICM), mas na possibilidade de alteração da agência humana.
+        </p>
+        <p class="editorial-text">
+          A integração com a espiritualidade e a cultura reflete uma mudança: o cérebro é um sistema aberto (biopsicossocial). A fronteira final da neuroética reside na privacidade mental e na "liberdade cognitiva" face ao avanço de algoritmos de decodificação neural.
+        </p>
+
+        <h3>2. Análise Crítica e Autores</h3>
+        <div class="glass-card">
+          <p class="editorial-text" style="margin-bottom:1rem; font-weight: bold; color: #8332A4;">O Intérprete e a Agência Humana</p>
+          <p class="editorial-text" style="margin-bottom:0;">
+            Gazzaniga (2018) demonstra que a mente é uma propriedade emergente, mas os valores morais residem no espaço social. O hemisfério esquerdo atua como um "intérprete" que cria narrativas coerentes. Se uma máquina altera uma decisão, o indivíduo ainda a reivindica como sua? Isso coloca em xeque o livre-arbítrio.
+          </p>
+        </div>
+        
+        <p class="editorial-text">
+          Lent (2023) reforça a plasticidade influenciada pelo ambiente. Experiências espirituais promovem alterações neuroquímicas mensuráveis, contribuindo para a homeostase. Lent também alerta para a desigualdade: o <em>neuroenhancement</em> pode aprofundar abismos sociais, exigindo uma neuroética de justiça distributiva.
+        </p>
+
+        <h3>3. Aplicação Prática (Cenário Corporativo)</h3>
+        <div class="callout callout-purple">
+          <div class="callout-title">⚖️ Dilema na NeuroLogix Brasil</div>
+          <p class="editorial-text" style="margin-bottom:1rem;">
+            A "NeuroLogix" usou headbands de EEG para monitorar burnout e oferecer meditação aos devs de software. O dilema ético surgiu quando dados de "privacidade mental" (menor foco, estresse) foram usados para <strong>negar promoções</strong> a funcionários com excelente entrega técnica. 
+          </p>
+          <p class="editorial-text" style="margin-bottom:0;">
+            <strong>A Resolução Ética:</strong> A empresa foi forçada a revisar políticas. Retirou a obrigatoriedade dos dispositivos, decretou que os dados neurais pertencem exclusivamente ao indivíduo (proibindo compartilhamento com gestores), respeitando a liberdade cognitiva e a diversidade cultural.
+          </p>
+        </div>
+
+        <h3>4. Síntese</h3>
+        <div class="callout callout-green">
+          <p class="editorial-text" style="margin-bottom:0;">
+            A neurociência exige um compromisso inegociável com a neuroética e a pluralidade biopsicossocial. Ao integrar Gazzaniga e Lent, vemos que o progresso tecnológico deve preservar a privacidade mental e a autonomia, garantindo que a tecnologia impulsione a vida, sem reduzir humanos a dados neurais.
+          </p>
+        </div>
+      </article>
+
+      <hr style="border:0; height:1px; background:var(--border-color); margin: 3rem 0;">
+
+      <!-- MÓDULO 5 -->
+      <article id="mod5" class="scroll-section">
+        <h2>Síntese Prática: Construindo Visões de Futuro e Mapas Conceituais</h2>
+
+        <figure class="anima-image-card">
+  <img src="images/4-anima.png" alt="Ilustração do Ecossistema Ânima Educação e neurociência aplicada" class="edu-img">
+</figure>
+
+        <h3>1. Contextualização Teórica</h3>
+        <p class="editorial-text">
+          A fronteira do conhecimento é definida pela convergência entre biologia molecular, engenharia e psicologia. O <strong>neurofeedback</strong> transforma o sujeito em um agente ativo na modulação de sua própria saúde. Paralelamente, a Inteligência Artificial (IA) decodifica padrões cerebrais imperceptíveis, estabelecendo a neurociência computacional.
+        </p>
+        
+        <p class="editorial-text">
+          Para organizar essa rede, a construção de mapas conceituais torna-se essencial. Um mapa conceitual não é apenas visual, mas uma estrutura hierárquica (ex: conceitos nucleares, verbos de ligação) que conecta o passado (Cajal) ao futuro (IA). O comportamento humano atual é resultado de milênios de evolução, e essa perspectiva temporal evita o reducionismo biológico.
+        </p>
+
+        <h3>2. Análise Crítica e Autores</h3>
+        <p class="editorial-text">
+          Bear et al. (2020) reforçam que a biologia subjacente permanece a unidade fundamental. A IA serve para amplificar a compreensão de redes distribuídas. Gazzaniga (2018) alerta para a distinção entre correlação e causalidade: visualizar uma área "acendendo" não explica a experiência subjetiva.
+        </p>
+        
+        <div class="callout callout-orange">
+          <div class="callout-title">⚠️ O Risco do Frenologismo Digital</div>
+          <p class="editorial-text" style="margin-bottom:0;">
+            Atribuir importância excessiva a padrões algorítmicos sem considerar o contexto biopsicossocial do sujeito pode gerar um novo "frenologismo digital". A construção de visões de futuro deve ser pautada pelo rigor científico ético, evitando promessas simplistas de "upgrade" cerebral.
+          </p>
+        </div>
+
+        <h3>3. Aplicação Prática (Cenário Corporativo)</h3>
+        <div class="simulator" aria-label="Simulador de Mapas Conceituais">
+          <div class="sim-header">🧠 Consultoria NeuroSinergia: Liderança e IA</div>
+          <div class="sim-nav" role="tablist">
+            <button class="sim-step-btn active" role="tab" onclick="openSimTab(event, 'sim3-step1')">Passo 1: IA & Feedback</button>
+            <button class="sim-step-btn" role="tab" onclick="openSimTab(event, 'sim3-step2')">Passo 2: Mapas Cognitivos</button>
+          </div>
+          <div class="sim-body">
+            <div id="sim3-step1" class="sim-panel active" role="tabpanel">
+              <h4 style="color:#00A3E0;">Diagnóstico em Tempo Real</h4>
+              <p class="editorial-text">A consultoria usa IA para analisar dados de EEG de executivos sob pressão, identificando fadiga antes do indivíduo perceber. O neurofeedback treina o executivo a entrar em "estado de fluxo", aumentando resiliência em ambientes voláteis.</p>
+            </div>
+            <div id="sim3-step2" class="sim-panel" role="tabpanel">
+              <h4 style="color:#00A859;">Mapas de Competências Neurocognitivas</h4>
+              <p class="editorial-text">Em vez de organogramas, os RHs constroem mapas ligando funções corporativas às habilidades cerebrais (ex: controle inibitório para crises). Líderes compreendem que o comportamento está ancorado na biologia, otimizável pela cultura da empresa.</p>
+            </div>
+          </div>
+        </div>
+
+        <h3>4. Síntese</h3>
+        <div class="callout callout-green">
+          <p class="editorial-text" style="margin-bottom:0;">
+            A convergência entre neurofeedback e IA redefine a disciplina. A utilização de mapas conceituais integra bases históricas a inovações disruptivas. O profissional do futuro deve navegar entre rigor científico e aplicação prática, desenhando intervenções éticas para o bem-estar social.
+          </p>
+        </div>
+
+      </article>
+
+    </div>
+  </main>
+
+  <!-- JAVASCRIPT VANILLA INTERNO -->
+  <script>
+    // 1. Reading Suite (Tema e Fonte)
+    const root = document.documentElement;
+    let currentFontSize = 1.1;
+
+    function setTheme(theme) {
+      root.setAttribute('data-theme', theme);
+      localStorage.setItem('anima-theme', theme);
+    }
+
+    function adjustFont(step) {
+      currentFontSize += (step * 0.1);
+      // Limites de tamanho (0.9rem a 1.6rem)
+      if (currentFontSize < 0.9) currentFontSize = 0.9;
+      if (currentFontSize > 1.6) currentFontSize = 1.6;
+      root.style.setProperty('--base-font-size', `${currentFontSize}rem`);
+      localStorage.setItem('anima-fontsize', currentFontSize);
+    }
+
+    // Inicializar persistência
+    document.addEventListener("DOMContentLoaded", () => {
+      const savedTheme = localStorage.getItem('anima-theme');
+      if (savedTheme) setTheme(savedTheme);
+      
+      const savedFont = localStorage.getItem('anima-fontsize');
+      if (savedFont) {
+        currentFontSize = parseFloat(savedFont);
+        root.style.setProperty('--base-font-size', `${currentFontSize}rem`);
+      }
+    });
+
+    // 2. Sidebar Toggle Mobile
+    const menuToggle = document.querySelector('.menu-toggle');
+    const sidebar = document.getElementById('sidebar');
+    
+    menuToggle.addEventListener('click', () => {
+      const isOpen = sidebar.classList.toggle('open');
+      menuToggle.setAttribute('aria-expanded', isOpen);
+    });
+
+    // Fechar sidebar ao clicar num link (mobile)
+    document.querySelectorAll('.toc-link').forEach(link => {
+      link.addEventListener('click', () => {
+        if(window.innerWidth < 1024) {
+          sidebar.classList.remove('open');
+          menuToggle.setAttribute('aria-expanded', 'false');
+        }
+      });
+    });
+
+    // 3. Scroll-Spy e Progress Bar
+    const sections = document.querySelectorAll('.scroll-section');
+    const tocLinks = document.querySelectorAll('.toc-link');
+    const progressBar = document.getElementById('reading-progress');
+
+    const observerOptions = {
+      root: null,
+      rootMargin: '-20% 0px -60% 0px',
+      threshold: 0
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          tocLinks.forEach(link => {
+            link.classList.remove('active');
+            if (link.getAttribute('href') === `#${entry.target.id}`) {
+              link.classList.add('active');
+            }
+          });
+        }
+      });
+    }, observerOptions);
+
+    sections.forEach(sec => observer.observe(sec));
+
+    window.addEventListener('scroll', () => {
+      const winScroll = document.body.scrollTop || document.documentElement.scrollTop;
+      const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+      const scrolled = (winScroll / height) * 100;
+      progressBar.style.width = scrolled + "%";
+    });
+
+    // 4. Lógica de Quizzes Interativos
+    function checkQuiz(btn) {
+      const container = btn.closest('.quiz-container');
+      const allBtns = container.querySelectorAll('.quiz-btn');
+      const feedback = container.querySelector('.quiz-feedback');
+      const retryBtn = container.querySelector('.btn-retry');
+      const isCorrect = btn.getAttribute('data-correct') === 'true';
+
+      // Desabilitar botões
+      allBtns.forEach(b => b.disabled = true);
+
+      if (isCorrect) {
+        btn.classList.add('correct');
+        feedback.innerHTML = '<strong>✅ Resposta Correta!</strong> Você compreendeu o conceito fundamental discutido no texto.';
+        feedback.style.backgroundColor = 'rgba(0,168,89,0.1)';
+        feedback.style.color = '#065f46';
+        if(root.getAttribute('data-theme') === 'dark') feedback.style.color = '#a7f3d0';
+        retryBtn.style.display = 'none';
+      } else {
+        btn.classList.add('incorrect');
+        feedback.innerHTML = '<strong>❌ Resposta Incorreta.</strong> Revise o conteúdo da seção e tente novamente.';
+        feedback.style.backgroundColor = 'rgba(239,68,68,0.1)';
+        feedback.style.color = '#991b1b';
+        if(root.getAttribute('data-theme') === 'dark') feedback.style.color = '#fca5a5';
+        retryBtn.style.display = 'inline-block';
+      }
+      feedback.classList.add('show');
+    }
+
+    function resetQuiz(retryBtn) {
+      const container = retryBtn.closest('.quiz-container');
+      const allBtns = container.querySelectorAll('.quiz-btn');
+      const feedback = container.querySelector('.quiz-feedback');
+      
+      allBtns.forEach(b => {
+        b.disabled = false;
+        b.classList.remove('correct', 'incorrect');
+      });
+      feedback.classList.remove('show');
+      retryBtn.style.display = 'none';
+    }
+
+    // 5. Lógica do Simulador (Tabs)
+    function openSimTab(evt, tabId) {
+      const simulator = evt.currentTarget.closest('.simulator');
+      
+      // Esconder todos os painéis
+      const panels = simulator.querySelectorAll('.sim-panel');
+      panels.forEach(p => p.classList.remove('active'));
+      
+      // Remover classe active dos botões
+      const tabs = simulator.querySelectorAll('.sim-step-btn');
+      tabs.forEach(t => {
+        t.classList.remove('active');
+        t.setAttribute('aria-selected', 'false');
+      });
+      
+      // Ativar painel e botão clicado
+      simulator.querySelector(`#${tabId}`).classList.add('active');
+      evt.currentTarget.classList.add('active');
+      evt.currentTarget.setAttribute('aria-selected', 'true');
+    }
+  </script>
+</body>
+</html>
