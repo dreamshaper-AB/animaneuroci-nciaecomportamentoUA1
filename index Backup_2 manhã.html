@@ -177,35 +177,7 @@
 
     .rs-btn:hover { background: var(--grad-secondary); color: white; border-color: transparent; }
 
-    /* Barra de Progresso Global (Mobile) - Fica no fundo do Header */
-    .global-progress-container {
-      display: none;
-      position: absolute;
-      bottom: 0;
-      left: 0;
-      width: 100%;
-      height: 4px;
-      background-color: rgba(0,0,0,0.05);
-    }
-    
-    [data-theme="dark"] .global-progress-container {
-      background-color: rgba(255,255,255,0.05);
-    }
-    
-    .global-progress-fill {
-      height: 100%;
-      background: var(--grad-primary);
-      width: 0%;
-      transition: width 0.1s linear;
-    }
-
-    /* Ajustes Adaptativos para Mobile */
-    @media (max-width: 1023px) {
-      .global-progress-container {
-        display: block; /* Mostra a barra global apenas em ecrãs menores */
-      }
-    }
-
+    /* Ajustes Adaptativos para Mobile (Header) */
     @media (max-width: 820px) {
       .app-header {
         padding: 0 1rem;
@@ -395,6 +367,33 @@
       border-color: rgba(255,255,255,0.1);
     }
 
+    /* AI Image Placeholders */
+    .anima-image-card {
+      max-width: 76ch;
+      margin: 2.5rem auto;
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+      background: var(--surface-color);
+      border: 1px solid var(--border-color);
+    }
+    .image-placeholder {
+      background: var(--bg-color);
+      height: 300px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      color: var(--text-muted);
+      border-bottom: 1px solid var(--border-color);
+    }
+    .placeholder-icon { font-size: 3rem; margin-bottom: 1rem; }
+    .ai-prompt-box { padding: 1rem; }
+    .ai-prompt-box summary { font-weight: bold; cursor: pointer; color: #8332A4; }
+    .prompt-content { padding-top: 1rem; font-size: 0.9rem; color: var(--text-muted); }
+    .prompt-content code { background: var(--bg-color); padding: 0.5rem; border-radius: 6px; display: block; white-space: pre-wrap; }
+
     /* Interactive Quizzes */
     .quiz-container {
       max-width: 76ch; margin: 3rem auto; background: var(--surface-color);
@@ -467,31 +466,32 @@
     /* =========================================================
    ESTILO INSTITUCIONAL PARA IMAGENS REALISTAS (ÂNIMA)
    ========================================================= */
-    .anima-image-card {
-      width: 100%;
-      margin: 2rem 0;
-      border-radius: 20px;
-      overflow: hidden;
-      background: transparent;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
-      border: 1px solid rgba(0, 0, 0, 0.05);
-      transition: transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1), box-shadow 0.3s ease;
-    }
+.anima-image-card {
+  width: 100%;
+  margin: 2rem 0;
+  border-radius: 20px;
+  overflow: hidden;
+  background: transparent;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  transition: transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1), box-shadow 0.3s ease;
+}
 
-    .anima-image-card:hover {
-      transform: translateY(-6px);
-      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.14);
-    }
+.anima-image-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.14);
+}
 
-    .anima-image-card img.edu-img,
-    img.edu-img {
-      width: 100%;
-      height: auto;
-      max-height: 500px;
-      object-fit: cover;
-      display: block;
-      border-radius: 20px;
-    }
+.anima-image-card img.edu-img,
+img.edu-img {
+  width: 100%;
+  height: auto;
+  max-height: 500px;
+  object-fit: cover;
+  display: block;
+  border-radius: 20px;
+}
+
   </style>
 </head>
 <body>
@@ -512,11 +512,6 @@
       <div style="width: 1px; height: 24px; background: var(--border-color); margin: 0 4px;"></div>
       <button class="rs-btn" onclick="adjustFont(-1)" aria-label="Diminuir Fonte" title="Diminuir Fonte">A-</button>
       <button class="rs-btn" onclick="adjustFont(1)" aria-label="Aumentar Fonte" title="Aumentar Fonte">A+</button>
-    </div>
-
-    <!-- Barra de progresso global (Mobile) fixada na base do header -->
-    <div class="global-progress-container">
-      <div class="global-progress-fill" id="global-reading-progress"></div>
     </div>
   </header>
 
@@ -552,10 +547,10 @@
       <article id="mod1" class="scroll-section">
         <h2>A Origem do Pensamento Sobre o Cérebro: Da Antiguidade ao Século XIX</h2>
         
-        <figure class="anima-image-card">
-          <!-- Aponta para a pasta 'images' -->
-          <img src="Images/1-ancient-greek.png" alt="A Origem do Pensamento Sobre o Cérebro" class="edu-img">
-        </figure>
+<figure class="anima-image-card">
+  <!-- Aponta para a pasta 'images' -->
+  <img src="Images/1-ancient-greek.png" alt="A Origem do Pensamento Sobre o Cérebro" class="edu-img">
+</figure>
 
         <h3>1. Contextualização Teórica</h3>
         <p class="editorial-text">
@@ -644,8 +639,8 @@
         <h2>A Revolução do Século XX: O Nascimento da Neurociência Moderna</h2>
         
         <figure class="anima-image-card">
-          <img src="Images/2-infografic-neuron.png" alt="Infográfico demonstrando a estrutura de um neurônio e a transmissão de impulsos nervosos" class="edu-img">
-        </figure>
+  <img src="Images/2-infografic-neuron.png" alt="Infográfico demonstrando a estrutura de um neurônio e a transmissão de impulsos nervosos" class="edu-img">
+</figure>
 
         <h3>1. Contextualização Teórica</h3>
         <p class="editorial-text">
@@ -701,8 +696,8 @@
         <h2>A Era Tecnológica e a Neurociência Contemporânea</h2>
 
         <figure class="anima-image-card">
-          <img src="Images/3-mri-v1.png" alt="Exame de ressonância magnética cerebral e mapeamento neurofuncional" class="edu-img">
-        </figure>
+  <img src="Images/3-mri-v1.png" alt="Exame de ressonância magnética cerebral e mapeamento neurofuncional" class="edu-img">
+</figure>
 
         <h3>1. Contextualização Teórica</h3>
         <p class="editorial-text">
@@ -790,7 +785,7 @@
             Gazzaniga (2018) demonstra que a mente é uma propriedade emergente, mas os valores morais residem no espaço social. O hemisfério esquerdo atua como um "intérprete" que cria narrativas coerentes. Se uma máquina altera uma decisão, o indivíduo ainda a reivindica como sua? Isso coloca em xeque o livre-arbítrio.
           </p>
         </div>
-
+        
         <p class="editorial-text">
           Lent (2023) reforça a plasticidade influenciada pelo ambiente. Experiências espirituais promovem alterações neuroquímicas mensuráveis, contribuindo para a homeostase. Lent também alerta para a desigualdade: o <em>neuroenhancement</em> pode aprofundar abismos sociais, exigindo uma neuroética de justiça distributiva.
         </p>
@@ -821,8 +816,8 @@
         <h2>Síntese Prática: Construindo Visões de Futuro e Mapas Conceituais</h2>
 
         <figure class="anima-image-card">
-          <img src="Images/4-anima.png" alt="Ilustração do Ecossistema Ânima Educação e neurociência aplicada" class="edu-img">
-        </figure>
+  <img src="Images/4-anima.png" alt="Ilustração do Ecossistema Ânima Educação e neurociência aplicada" class="edu-img">
+</figure>
 
         <h3>1. Contextualização Teórica</h3>
         <p class="editorial-text">
@@ -855,7 +850,7 @@
           <div class="sim-body">
             <div id="sim3-step1" class="sim-panel active" role="tabpanel">
               <h4 style="color:#00A3E0;">Diagnóstico em Tempo Real</h4>
-              <p class="editorial-text">A consultoria usa IA para analisar dados de EEG de executivos sob pressão, identificando fadiga antes do indivíduo perceber. O neurofeedback treina o executivo a entrar em "estado de fluxo", aumentando resiliência em ambientes voláteis.</p>
+              <p class="editorial-text">A consultoria usa IA para analisar dados de EEG de executivos sob pressão, identificando fadiga antes do индивидuo perceber. O neurofeedback treina o executivo a entrar em "estado de fluxo", aumentando resiliência em ambientes voláteis.</p>
             </div>
             <div id="sim3-step2" class="sim-panel" role="tabpanel">
               <h4 style="color:#00A859;">Mapas de Competências Neurocognitivas</h4>
@@ -927,11 +922,10 @@
       });
     });
 
-    // 3. Scroll-Spy e Progress Bar (Sidebar + Global Mobile)
+    // 3. Scroll-Spy e Progress Bar
     const sections = document.querySelectorAll('.scroll-section');
     const tocLinks = document.querySelectorAll('.toc-link');
     const progressBar = document.getElementById('reading-progress');
-    const globalProgressBar = document.getElementById('global-reading-progress');
 
     const observerOptions = {
       root: null,
@@ -958,9 +952,7 @@
       const winScroll = document.body.scrollTop || document.documentElement.scrollTop;
       const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
       const scrolled = (winScroll / height) * 100;
-      
-      if(progressBar) progressBar.style.width = scrolled + "%";
-      if(globalProgressBar) globalProgressBar.style.width = scrolled + "%";
+      progressBar.style.width = scrolled + "%";
     });
 
     // 4. Lógica de Quizzes Interativos
